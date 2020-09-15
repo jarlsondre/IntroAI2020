@@ -31,37 +31,43 @@ class Node:
     def add_child(self, child):
         self.kids.append(child)
 
+    def get_pos(self):
+        return self.pos
+
     def __str__(self):
         pos = "[" + str(self.pos[0]) + ", " + str(self.pos[1]) + "]"
         return pos 
 
 
 def main():
+    
+    # Making the list of nodes:
+    opened = []
+    closed = []
+    frontier = [] # the nodes we're going to be looking at next, sorted by their heuristic
+
+    # Creating a map object:
     myMap = Map.Map_Obj(1)
     myMap.show_map()
+
+    # Creating some instances of nodes and testing their positions;
     startNode = Node(myMap.get_start_pos())
     goalNode = Node(myMap.get_goal_pos())
     print("Goal node:", goalNode)
     print("Start node:", startNode)
-    print("Chanding start pos")
-    myMap.set_start_pos_str_marker([26, 18], "samfundet_map_1.csv")
-    myMap.show_map()
 
-def A_star_impl():
-    # The frontier is a list of nodes
-    frontier = []
+    # Adding nodes to list:
+    opened.append(startNode)
+    frontier.append(startNode)
 
+    # Testing the distance function:
+    print("Manhattan distance between start and goal: ", manhattan_distance(startNode.get_pos(), goalNode.get_pos()))
 
-    pass
-
-def heuristic(node, goal):
-    # Calculating the euclidean distance between a node and the goal node:
-    hor_dist = abs(node[0] - goal[0])
-    ver_dist = abs(node[1] - goal[1])
-    distance = math.sqrt(hor_dist**2 + ver_dist**2) 
-    print(distance)
-    return distance
-    
+def manhattan_distance(first_pos, second_pos): # Calculating the distance in how many steps it takes to move there
+    hor_dist = abs(first_pos[0] - second_pos[0])
+    ver_dist = abs(first_pos[1] - second_pos[1])
+    return hor_dist + ver_dist
+       
 
 if __name__ == "__main__":
     main()
