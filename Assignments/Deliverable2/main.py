@@ -1,16 +1,23 @@
-# This is a sample Python script.
+import Map
+import math
+# Implementation of the A* algorithm :)
+def A_star_impl():
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+    # We want a heuristic function. To calculate this we'll use the euclidean distance.
 
+    # placeholder while we're figuring things out
+    return 0
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def heuristic(node, goal):
+    # Calculating the euclidean distance between a node and the goal node:
+    hor_dist = abs(node[0] - goal[0])
+    ver_dist = abs(node[1] - goal[1])
+    distance = math.sqrt(hor_dist**2 + ver_dist**2) 
+    print(distance)
+    return distance
+    
 
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# task = int(input("Which task are you on? (int)"))
+myMap = Map.Map_Obj(1)
+myMap.show_map()
+heuristic([5, 5], myMap.get_goal_pos())
