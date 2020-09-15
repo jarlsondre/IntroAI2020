@@ -4,13 +4,14 @@ import math
 
 class Node:
     
-    def __init__(self):
+    def __init__(self, pos=[0,0]):
         self.g_cost = 0
         self.h_cost = 0
         self.f_cost = 0
         self.status = "open"
         self.parent = None
         self.kids = []
+        self.pos = pos
 
     def set_h_cost(self, pos, goal):
         self.h_cost = heuristic(pos, goal)
@@ -30,7 +31,27 @@ class Node:
     def add_child(self, child):
         self.kids.append(child)
 
+    def __str__(self):
+        pos = "[" + str(self.pos[0]) + ", " + str(self.pos[1]) + "]"
+        return pos 
+
+
+def main():
+    myMap = Map.Map_Obj(1)
+    myMap.show_map()
+    startNode = Node(myMap.get_start_pos())
+    goalNode = Node(myMap.get_goal_pos())
+    print("Goal node:", goalNode)
+    print("Start node:", startNode)
+    print("Chanding start pos")
+    myMap.set_start_pos_str_marker([26, 18], "samfundet_map_1.csv")
+    myMap.show_map()
+
 def A_star_impl():
+    # The frontier is a list of nodes
+    frontier = []
+
+
     pass
 
 def heuristic(node, goal):
@@ -42,7 +63,6 @@ def heuristic(node, goal):
     return distance
     
 
-# task = int(input("Which task are you on? (int)"))
-myMap = Map.Map_Obj(1)
-myMap.show_map()
-heuristic([5, 5], myMap.get_goal_pos())
+if __name__ == "__main__":
+    main()
+
