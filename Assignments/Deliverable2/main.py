@@ -43,15 +43,14 @@ class Node:
         pos = "[" + str(self.pos[0]) + ", " + str(self.pos[1]) + "]"
         return pos
 
-
-def main():
+def task(task_number):
     # Making the list of nodes:
     opened = []
     closed = []
     frontier = []  # the nodes we're going to be looking at next, sorted by their heuristic
 
     # Creating a map object:
-    myMap = Map.Map_Obj(1)
+    myMap = Map.Map_Obj(task_number)
     myMap.show_map()
 
     # Creating some instances of nodes and testing their positions;
@@ -84,7 +83,7 @@ def main():
         for i in range(-1, 2):
             for j in range(-1, 2):
                 if (i == 0) ^ (j == 0):
-                    if myMap.get_cell_value([currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j]) == 1:
+                    if myMap.get_cell_value([currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j]) != -1:
                         nodeExist = False
                         for elem in opened:
                             if elem.pos == [currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j]:
@@ -95,11 +94,9 @@ def main():
                         if not nodeExist:
                             node = Node([currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j])
                         if not node in closed:
-                            print(node)
-                            print(currentNode)
                             node.set_parent(currentNode)
                             currentNode.add_child(node)
-                            node.set_g_cost(node.parent.get_g_cost() + 1)
+                            node.set_g_cost(node.parent.get_g_cost() + myMap.get_cell_value([currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j]))
                             node.set_h_cost(myMap.get_goal_pos())
                             node.set_f_cost()
                             opened.append(node)
@@ -118,9 +115,14 @@ def main():
 
     for node in goal_path:
         myMap.set_cell_value(node.get_pos(), 'G')
-        print(node)
-
     myMap.show_map()
+
+def main():
+    task(1)
+    task(2)
+    task(3)
+    task(4)
+
 
 
 
