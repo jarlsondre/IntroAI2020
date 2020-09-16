@@ -51,7 +51,6 @@ def task(task_number):
 
     # Creating a map object:
     myMap = Map.Map_Obj(task_number)
-    myMap.show_map()
 
     # Creating some instances of nodes and testing their positions;
 
