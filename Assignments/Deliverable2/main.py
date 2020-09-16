@@ -37,7 +37,7 @@ class Node:
         return self.pos
 
     def get_g_cost(self):
-        return self.get_g_cost()
+        return self.g_cost
 
     def __str__(self):
         pos = "[" + str(self.pos[0]) + ", " + str(self.pos[1]) + "]"
@@ -73,8 +73,6 @@ def main():
     while goal_not_found:
         currentNode = frontier[0]
 
-        print(currentNode)
-
         # Checking if it´s the goal node:
         if currentNode.h_cost == 0:
             print("Hurra, du fant noden på: ", currentNode)
@@ -97,23 +95,33 @@ def main():
                         if not nodeExist:
                             node = Node([currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j])
                         if not node in closed:
+                            print(node)
+                            print(currentNode)
                             node.set_parent(currentNode)
                             currentNode.add_child(node)
-                            # node.set_g_cost(node.parent.get_g_cost() + 1)
-                            node.set_h_cost(myMap.get_goal_pos)
+                            node.set_g_cost(node.parent.get_g_cost() + 1)
+                            node.set_h_cost(myMap.get_goal_pos())
                             node.set_f_cost()
                             opened.append(node)
                             frontier.append(node)
-
 
         frontier.sort(key=lambda x: x.f_cost)
 
         frontier.remove(currentNode)
         closed.append(currentNode)
-        goal_not_found = False
 
-    for elem in startNode.kids:
-        print(elem)
+        goal_path = [currentNode]
+
+    while currentNode.parent is not None:
+        currentNode = currentNode.parent
+        goal_path.append(currentNode)
+
+    for node in goal_path:
+        myMap.set_cell_value(node.get_pos(), 'G')
+        print(node)
+
+    myMap.show_map()
+
 
 
 def manhattan_distance(first_pos, second_pos):  # Calculating the distance in how many steps it takes to move there
