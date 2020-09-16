@@ -86,6 +86,8 @@ def task(task_number):
                 if (i == 0) ^ (j == 0):
                     if myMap.get_cell_value([currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j]) != -1:
                         nodeExist = False
+
+                        # Checking if there already exists a node in the current position. In which case we don't create a new node
                         for elem in opened:
                             if elem.pos == [currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j]:
                                 node = elem
@@ -94,6 +96,8 @@ def task(task_number):
 
                         if not nodeExist:
                             node = Node([currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j])
+
+                        # Only if the node is open will we expand it and add its children
                         if not node in closed:
                             node.set_parent(currentNode)
                             currentNode.add_child(node)
@@ -103,13 +107,15 @@ def task(task_number):
                             opened.append(node)
                             frontier.append(node)
 
+        # We sort the frontier based on the heuristic function
         frontier.sort(key=lambda x: x.f_cost)
 
         frontier.remove(currentNode)
         closed.append(currentNode)
 
         goal_path = [currentNode]
-
+    
+    # Plotting the path to the node
     while currentNode.parent is not None:
         currentNode = currentNode.parent
         goal_path.append(currentNode)
