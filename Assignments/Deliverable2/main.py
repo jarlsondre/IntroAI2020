@@ -70,6 +70,7 @@ def task(task_number):
 
     # This loop will run until we find the shortest path
     while goal_not_found:
+        myMap.tick()
         currentNode = frontier[0]
 
         # Checking if it´s the goal node:
@@ -115,6 +116,85 @@ def task(task_number):
 
     for node in goal_path:
         myMap.set_cell_value(node.get_pos(), 'G')
+    myMap.set_cell_value(myMap.get_start_pos(), ' S ')
+    myMap.show_map()
+
+def task_5():
+    # Creating a map object:
+    myMap = Map.Map_Obj(5)
+    myMap.show_map()
+
+    goal_not_found = True
+    counter = 0
+    while goal_not_found:
+        # Making the list of nodes:
+        myMap.tick()
+        counter += 1
+        opened = []
+        closed = []
+        frontier = []  # the nodes we're going to be looking at next, sorted by their heuristic
+        goal_path = []
+        # Creating some instances of nodes and testing their positions;
+        startNode = Node(myMap.get_start_pos())
+        startNode.set_g_cost(0)
+        startNode.set_h_cost(myMap.get_goal_pos())
+        startNode.set_f_cost()
+
+        # Adding node to list:
+        opened.append(startNode)
+        frontier.append(startNode)
+
+        # This loop will run until we find the shortest path
+
+
+        while goal_not_found:
+            currentNode = frontier[0]
+
+            # Checking if it´s the goal node:
+            if currentNode.h_cost == 0:
+                break
+
+            # If not, then we have to search further :)
+
+            # Creating children in a plus shape
+            for i in range(-1, 2):
+                for j in range(-1, 2):
+                    if (i == 0) ^ (j == 0):
+                        if myMap.get_cell_value([currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j]) != -1:
+                            nodeExist = False
+                            for elem in opened:
+                                if elem.pos == [currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j]:
+                                    node = elem
+                                    nodeExist = True
+                                    break
+
+                            if not nodeExist:
+                                node = Node([currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j])
+                            if not node in closed:
+                                node.set_parent(currentNode)
+                                currentNode.add_child(node)
+                                node.set_g_cost(node.parent.get_g_cost() + myMap.get_cell_value([currentNode.get_pos()[0] + i, currentNode.get_pos()[1] + j]))
+                                node.set_h_cost(myMap.get_goal_pos())
+                                node.set_f_cost()
+                                opened.append(node)
+                                frontier.append(node)
+
+            frontier.sort(key=lambda x: x.f_cost)
+
+            frontier.remove(currentNode)
+            closed.append(currentNode)
+
+
+        while currentNode.parent is not None:
+            currentNode = currentNode.parent
+            goal_path.append(currentNode)
+
+        if len(goal_path) < counter:
+            goal_not_found = False
+
+    for node in goal_path:
+        myMap.set_cell_value(node.get_pos(), 'G')
+    myMap.set_cell_value(myMap.get_start_pos(), ' S ')
     myMap.show_map()
 
 def main():
@@ -122,6 +202,8 @@ def main():
     task(2)
     task(3)
     task(4)
+    task_5()
+
 
 
 
