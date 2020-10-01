@@ -14,7 +14,7 @@
 
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random, util, itertools
 
 from game import Agent
 
@@ -136,12 +136,68 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         legalMoves = gameState.getLegalActions()
+        move = legalMoves[0]
+        max_value = -1000000
+        for action in legalMoves:
+            successorGameState = gameState.generateSuccessor(0, action)
+            value = self.miniMaxFunction(successorGameState, self.depth, False)
+            # print(f"value: {value}, action: {action}, score: {successorGameState.getScore()}, currentScore: {gameState.getScore()} ")
+            if max_value <= value:
+                max_value = value
+                move = action
+        # print(f'move: {move}')
+        return move
 
-        print(gameState.getNumAgents())
-        return legalMoves[0] 
 
-    def evaluationFunction(self, currentGameState, action): 
-        pass
+    def miniMaxFunction(self, currentGameState, depth, is_pacman):
+        # We want a tree where the successors to max is where pacman can move, and the
+        # successors to min is where the ghosts can move. Min will always choose the position
+        # in which the score is the lowest, and max will always choose the position
+        # in which the score is the highest.
+
+        # If depth is zero then we will evaluate the score of the current position:
+        if depth == 0:
+            return currentGameState.getScore()
+        elif currentGameState.isLose():
+            return currentGameState.getScore()
+        elif currentGameState.isWin():
+            return currentGameState.getScore()
+        else:
+            # If the depth is not zero then we will call the function again, with a boolean depending on the
+            # input boolean
+            if is_pacman:
+                legalMoves = currentGameState.getLegalActions()
+                max_val = -1000000
+                for action in legalMoves:
+                    successorGameState = currentGameState.generateSuccessor(0, action)
+                    val = self.miniMaxFunction(successorGameState, depth, False)
+                    max_val = max(max_val, val)
+                return max_val
+
+            else:
+                depth -= 1
+                agent_legal_move_list = []
+                number_of_agents = currentGameState.getNumAgents()
+                for i in range(1, number_of_agents):
+                    agent_legal_move_list.append(currentGameState.getLegalActions(i))
+                move_list = list(itertools.product(*agent_legal_move_list))
+                min_val = 1000000
+
+                for actions in move_list:
+                    successorGameState = currentGameState
+                    for i in range(1, number_of_agents):
+                        if not successorGameState.isLose() and not successorGameState.isWin():
+                            successorGameState = successorGameState.generateSuccessor(i, actions[i-1])
+                    # At this point, successorGameState is up to date. All ghosts have made a move
+                    if successorGameState.isLose():
+                        val = successorGameState.getScore()
+                    elif successorGameState.isWin():
+                        val = successorGameState.getScore()
+                    else:
+                        val = self.miniMaxFunction(successorGameState, depth, True)
+                    min_val = min(min_val, val)
+                return min_val
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -153,7 +209,77 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        legalMoves = gameState.getLegalActions()
+        move = legalMoves[0]
+        max_value = -1000000
+        alpha = -1000000
+        beta = 1000000
+
+        for action in legalMoves:
+            successorGameState = gameState.generateSuccessor(0, action)
+            value = self.miniMaxFunction(successorGameState, self.depth, alpha, beta, False)
+            if max_value <= value:
+                max_value = value
+                move = action
+            alpha = max(value, alpha)
+            if beta < alpha:
+                break
+        return move
+
+    def miniMaxFunction(self, currentGameState, depth, alpha, beta, is_pacman):
+        # We want a tree where the successors to max is where pacman can move, and the
+        # successors to min is where the ghosts can move. Min will always choose the position
+        # in which the score is the lowest, and max will always choose the position
+        # in which the score is the highest.
+
+        # If depth is zero then we will evaluate the score of the current position:
+        if depth == 0:
+            return currentGameState.getScore()
+        elif currentGameState.isLose():
+            return currentGameState.getScore()
+        elif currentGameState.isWin():
+            return currentGameState.getScore()
+        else:
+            # If the depth is not zero then we will call the function again, with a boolean depending on the
+            # input boolean
+            if is_pacman:
+                legalMoves = currentGameState.getLegalActions()
+                max_val = -1000000
+                for action in legalMoves:
+                    successorGameState = currentGameState.generateSuccessor(0, action)
+                    val = self.miniMaxFunction(successorGameState, depth, alpha, beta, False)
+                    max_val = max(max_val, val)
+                    alpha = max(alpha, val)
+                    if beta < alpha:
+                        break
+                return max_val
+
+            else:
+                depth -= 1
+                agent_legal_move_list = []
+                number_of_agents = currentGameState.getNumAgents()
+                for i in range(1, number_of_agents):
+                    agent_legal_move_list.append(currentGameState.getLegalActions(i))
+                move_list = list(itertools.product(*agent_legal_move_list))
+                min_val = 1000000
+
+                for actions in move_list:
+                    successorGameState = currentGameState
+                    for i in range(1, number_of_agents):
+                        if not successorGameState.isLose() and not successorGameState.isWin():
+                            successorGameState = successorGameState.generateSuccessor(i, actions[i - 1])
+                    # At this point, successorGameState is up to date. All ghosts have made a move
+                    if successorGameState.isLose():
+                        val = successorGameState.getScore()
+                    elif successorGameState.isWin():
+                        val = successorGameState.getScore()
+                    else:
+                        val = self.miniMaxFunction(successorGameState, depth, alpha, beta, True)
+                    min_val = min(min_val, val)
+                    beta = min(beta, val)
+                    if beta < alpha:
+                        break
+                return min_val
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
