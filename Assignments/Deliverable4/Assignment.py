@@ -14,6 +14,9 @@ class CSP:
         # the variable pair (i, j)
         self.constraints = {}
 
+        self.backtrack_called = 0
+        self.backtrack_returned_failure = 0
+
     def add_variable(self, name, domain):
         """Add a new variable to the CSP. 'name' is the variable name
         and 'domain' is a list of the legal values for the variable.
@@ -109,7 +112,22 @@ class CSP:
         iterations of the loop.
         """
         # TODO: IMPLEMENT THIS
-        pass
+        self.backtrack_called += 1
+        var = self.select_unassigned_variable(assignment)
+        if var == "":
+            return assignment
+        for value in self.domains[var]:
+            assigment_copy = copy.deepcopy(assignment)
+            if value in assignment[var]:
+                assignment[var] = value
+                inference = self.inference(assignment, self.get_all_neighboring_arcs(var))
+                if inference:
+                    result = self.backtrack(assignment)
+                    if result != -1:
+                        return result
+            assignment = assigment_copy
+        self.backtrack_returned_failure += 1
+        return -1
 
     def select_unassigned_variable(self, assignment):
         """The function 'Select-Unassigned-Variable' from the pseudocode
@@ -118,7 +136,10 @@ class CSP:
         of legal values has a length greater than one.
         """
         # TODO: IMPLEMENT THIS
-        pass
+        for i in self.variables:
+            if len(assignment[i]) > 1:
+                return i
+        return ""
 
     def inference(self, assignment, queue):
         """The function 'AC-3' from the pseudocode in the textbook.
@@ -127,7 +148,19 @@ class CSP:
         is the initial queue of arcs that should be visited.
         """
         # TODO: IMPLEMENT THIS
-        pass
+        while queue:
+            tmp = queue.pop(0)
+            i = tmp[0]
+            j = tmp[1]
+            if self.revise(assignment, i, j):
+                if len(assignment[i]) == 0:
+                    return False
+
+                tmp = self.get_all_neighboring_arcs(i)
+                tmp.remove((j, i))
+                for k in tmp:
+                    queue.append(k)
+        return True
 
     def revise(self, assignment, i, j):
         """The function 'Revise' from the pseudocode in the textbook.
@@ -139,7 +172,17 @@ class CSP:
         legal values in 'assignment'.
         """
         # TODO: IMPLEMENT THIS
-        pass
+        revised = False
+        for x in assignment[i]:
+            var = False
+            for y in assignment[j]:
+                if (x, y) in self.constraints[i][j]:
+                    var = True
+                    break
+            if not var:
+                assignment[i].remove(x)
+                revised = True
+        return revised
 
 
 def create_map_coloring_csp():
@@ -196,9 +239,46 @@ def print_sudoku_solution(solution):
     """
     for row in range(9):
         for col in range(9):
-            print(solution['%d-%d' % (row, col)][0]),
+            if len(solution['%d-%d' % (row, col)]) == 1:
+                print(solution['%d-%d' % (row, col)][0], " ", end=""),
+            else:
+                print(0, end=""),
             if col == 2 or col == 5:
-                print('|'),
+                print('|', " ", end=""),
         print("")
         if row == 2 or row == 5:
-            print('------+-------+------')
+            print('---------+-----------+---------')
+
+
+easy = create_sudoku_csp("easy.txt")
+medium = create_sudoku_csp("medium.txt")
+hard = create_sudoku_csp("hard.txt")
+very_hard = create_sudoku_csp("veryhard.txt")
+
+print('---------+---EASY----+---------')
+print_sudoku_solution(easy.backtracking_search())
+print(f'Backtracked called: {easy.backtrack_called}, Backtracked failure: {easy.backtrack_returned_failure}')
+print()
+print()
+
+print('---------+--MEDIUM---+---------')
+print_sudoku_solution(medium.backtracking_search())
+print(f'Backtracked called: {medium.backtrack_called}, Backtracked failure: {medium.backtrack_returned_failure}')
+print()
+print()
+
+print('---------+---HARD----+---------')
+print_sudoku_solution(hard.backtracking_search())
+print(f'Backtracked called: {hard.backtrack_called}, Backtracked failure: {hard.backtrack_returned_failure}')
+print()
+print()
+
+print('---------+-VERY-HARD-+---------')
+print_sudoku_solution(very_hard.backtracking_search())
+print(f'Backtracked called: {very_hard.backtrack_called}, Backtracked failure: {very_hard.backtrack_returned_failure}')
+print()
+print()
+
+
+
+
