@@ -112,22 +112,22 @@ class CSP:
         iterations of the loop.
         """
         # TODO: IMPLEMENT THIS
-        self.backtrack_called += 1
+        self.backtrack_called += 1  # Øker telleren på hvor mange ganger backtrack blir kalt
         var = self.select_unassigned_variable(assignment)
-        if var == "":
+        if var == "":  # Hvis var == "" finnes det ikke flere variabler uten fastsatt verdi og løsningen returners
             return assignment
-        for value in self.domains[var]:
-            assigment_copy = copy.deepcopy(assignment)
-            if value in assignment[var]:
-                assignment[var] = value
-                inference = self.inference(assignment, self.get_all_neighboring_arcs(var))
-                if inference:
-                    result = self.backtrack(assignment)
-                    if result != -1:
-                        return result
+        for value in assignment[var]:  # Prøver mulige verdier
+            assigment_copy = copy.deepcopy(assignment)  # Lager en kopi hvis vi prøver noen som er feil
+            assignment[var] = value  # Setter verdien til variabelen til value for å prøve om den passer
+            if self.inference(assignment, self.get_all_neighboring_arcs(var)):
+                # Hvis funksjonen returnere False har vi ingen løsning.
+                result = self.backtrack(assignment)
+                if result != -1:  # Hvis result == -1 har vi ingen løsning.
+                    return result
             assignment = assigment_copy
+            # Hvis vi ikke fikk en løsning tilbkaestiller vi assigment og prøver for neste tall i domenet.
         self.backtrack_returned_failure += 1
-        return -1
+        return -1  # Returner hvis vi ikke har en løsning
 
     def select_unassigned_variable(self, assignment):
         """The function 'Select-Unassigned-Variable' from the pseudocode
@@ -136,10 +136,11 @@ class CSP:
         of legal values has a length greater than one.
         """
         # TODO: IMPLEMENT THIS
+        # Returnerer den første variabelen som her flere mulige verdier.
         for i in self.variables:
             if len(assignment[i]) > 1:
                 return i
-        return ""
+        return ""  # Hvis det ikke finnes flere variabler uten verdi returners ""
 
     def inference(self, assignment, queue):
         """The function 'AC-3' from the pseudocode in the textbook.
@@ -153,13 +154,13 @@ class CSP:
             i = tmp[0]
             j = tmp[1]
             if self.revise(assignment, i, j):
-                if len(assignment[i]) == 0:
+                if len(assignment[i]) == 0:  # Returner false hvis det ikke finnes noen mulige verdier for i
                     return False
 
                 tmp = self.get_all_neighboring_arcs(i)
-                tmp.remove((j, i))
+                tmp.remove((j, i))  # Fjerner (j, i) siden den er gjennomført.
                 for k in tmp:
-                    queue.append(k)
+                    queue.append(k)  # Legger til nye elementer å sjekke for, siden assigment[i] er endret
         return True
 
     def revise(self, assignment, i, j):
@@ -173,16 +174,17 @@ class CSP:
         """
         # TODO: IMPLEMENT THIS
         revised = False
-        for x in assignment[i]:
+        for x in assignment[i]:  # Går gjennom mulige verdier for i.
             var = False
-            for y in assignment[j]:
+            for y in assignment[j]:  # Går gjennom mulige verdier for j.
                 if (x, y) in self.constraints[i][j]:
-                    var = True
+                    var = True  # Setter var = True hvis det finnes en verdi y for x slik at constrains er oppfylt.
                     break
             if not var:
+                # Hvis ikke constrains er mulig å oppfylt for x, fjernes x fra mulige verdier for i.
                 assignment[i].remove(x)
                 revised = True
-        return revised
+        return revised  # Returner True hvis den har fjernet en verdi, False hvis ikke.
 
 
 def create_map_coloring_csp():
