@@ -113,20 +113,24 @@ class CSP:
         """
         # TODO: IMPLEMENT THIS
         self.backtrack_called += 1  # Øker telleren på hvor mange ganger backtrack blir kalt
-        var = self.select_unassigned_variable(assignment)
-        if var == "":  # Hvis var == "" finnes det ikke flere variabler uten fastsatt verdi og løsningen returners
+        var = self.select_unassigned_variable(assignment)  # Velger en variabel som har flere mulige verdier
+
+        if var == "":  # Dersom True vil alle variabler har en fastsatt verdi og dermed har vi en løsning. Denne returneres
             return assignment
-        for value in assignment[var]:  # Prøver mulige verdier
-            assigment_copy = copy.deepcopy(assignment)  # Lager en kopi hvis vi prøver noen som er feil
-            assignment[var] = value  # Setter verdien til variabelen til value for å prøve om den passer
-            if self.inference(assignment, self.get_all_neighboring_arcs(var)):
-                # Hvis funksjonen returnere False har vi ingen løsning.
+
+        # Dersom vi ikke har en løsning:
+        for value in assignment[var]:  # Vi prøver alle mulige lovlige verdier for denne variabelen
+            assigment_copy = copy.deepcopy(assignment)  # Lager en kopi slik at vi ikke endrer originalen
+            assignment[var] = value  # Setter verdien til variabelen til value for å se om det er riktig verdi
+
+            if self.inference(assignment, self.get_all_neighboring_arcs(var)):  # Dersom inference returnerer False vet vi at dette var feil løsning
+                # Nå kjører vi løkken på nytt med den nye listen over lovlige elementer. Nå har vi satt en verdi
                 result = self.backtrack(assignment)
                 if result != -1:  # Hvis result == -1 har vi ingen løsning.
                     return result
-            assignment = assigment_copy
-            # Hvis vi ikke fikk en løsning tilbkaestiller vi assigment og prøver for neste tall i domenet.
-        self.backtrack_returned_failure += 1
+
+            assignment = assigment_copy  # Dersom vi har kommet oss hit så betyr det at vi har feilet på et steg i prosessen, så vi resetter og prøver neste mulige verdi for variabelen
+        self.backtrack_returned_failure += 1  # Dersom backtrack ikke fant noen løsning så øker vi failure-counteren
         return -1  # Returner hvis vi ikke har en løsning
 
     def select_unassigned_variable(self, assignment):
@@ -149,18 +153,19 @@ class CSP:
         is the initial queue of arcs that should be visited.
         """
         # TODO: IMPLEMENT THIS
-        while queue:
-            tmp = queue.pop(0)
-            i = tmp[0]
-            j = tmp[1]
-            if self.revise(assignment, i, j):
-                if len(assignment[i]) == 0:  # Returner false hvis det ikke finnes noen mulige verdier for i
+        while queue:  # Løkken skal iterere så lenge det er elementer igjen i køen
+            tmp = queue.pop(0)  # Vi tar ut det første elementet på formen ('x1-y1', 'x2-y2')
+            i = tmp[0]  # Setter denne lik 'x1-y1'
+            j = tmp[1]  # Setter denne lik 'x2-y2'
+            if self.revise(assignment, i, j):  # Hvis vi klarte å revise mhp. 'x1-y1', altså fantes det noen "lovlige" verdier for i som viste seg å ikke være lovlige like vel?
+                if len(assignment[i]) == 0:  # Sjekker om det ikke finnes noen lovlige verdier for i, returnerer False hvis det er tilfellet
                     return False
 
-                tmp = self.get_all_neighboring_arcs(i)
-                tmp.remove((j, i))  # Fjerner (j, i) siden den er gjennomført.
+                tmp = self.get_all_neighboring_arcs(i)  # Setter tmp lik listen med alle constraints som hører til variabelen i
+                tmp.remove((j, i))  # Fjerner (j, i) siden vi allerede har "revised" mhp denne
                 for k in tmp:
-                    queue.append(k)  # Legger til nye elementer å sjekke for, siden assigment[i] er endret
+                    queue.append(k)  # For alle constraints til variabelen i vil vi revise, så disse legges til i køen.
+                    # Dersom noe allerede har blitt revised, vil det bli forsøkt revised på nytt. Dette vil returnere False hvis man ikke fikk gjort noe med den, og da legges den ikke til igjen
         return True
 
     def revise(self, assignment, i, j):
@@ -256,6 +261,15 @@ easy = create_sudoku_csp("easy.txt")
 medium = create_sudoku_csp("medium.txt")
 hard = create_sudoku_csp("hard.txt")
 very_hard = create_sudoku_csp("veryhard.txt")
+
+#
+# print(f"get_all_arcs gir ut alle de forskjellige rutene (variables) som kan komme i konflikt \n"
+#       f"dvs de som er i samme vertikale linje, horisontale linue eller i samme box på hele brettet \n")
+# print(easy.get_all_arcs(), "\n")
+# print(easy.get_all_neighboring_arcs("0-0"), "\n")
+
+
+
 
 print('---------+---EASY----+---------')
 print_sudoku_solution(easy.backtracking_search())
